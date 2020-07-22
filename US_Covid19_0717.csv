@@ -1,4 +1,4 @@
-submission_date,state Code,State,tot_cases,conf_cases,prob_cases,new_case,pnew_case,tot_death,conf_death,prob_death,new_death,pnew_death,created_at,consent_cases,consent_deaths,State Code
+submission_date,state Code,State,tot_cases,conf_cases,prob_cases,new_case,pnew_case,tot_death,conf_death,prob_death,new_death,pnew_death,created_at,consent_cases,consent_deaths,state_code
 7/17/2020,AK,Alaska,"1,733",,,40,0,17,,,0,0,7/18/2020 16:14,N/A,N/A,54
 7/17/2020,AL,Alabama,"63,153","62,172",981,"2,010",50,"1,263","1,233",30,33,1,7/18/2020 16:14,Agree,Agree,1
 7/17/2020,AR,Arkansas,"31,762",,,648,0,353,,,12,0,7/18/2020 16:14,Not agree,Not agree,3
