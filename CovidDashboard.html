@@ -1,0 +1,856 @@
+<html lang="en">
+<head>
+<title>COVID Dashboard US</title>
+<meta charset="utf-8">
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<div>
+<h1 style="text-align:center;color:black;font-family:Calibri;font-size:400%">COVID-19 Spread in USA</h1>
+</div>
+<br>
+<div>
+  <input type="radio" name="covidtest" checked = "checked" value="tot_cases"><label style="font-family:calibri;font-size:16px">Overall Covid Spread </label>
+  <input type="radio" name="covidtest" value="new_case"><label style="font-family:calibri;font-size:16px">New Covid Spread</label>
+  <input type="radio" name="covidtest" value="daily_trend"><label style="font-family:calibri;font-size:16px">Daily Trend of Cases</label>
+  <input type="radio" name="covidtest" value="statewise"><label style="font-family:calibri;font-size:16px">Trend in different US States</label>
+  <br><br>
+  <input type="button" value = "Total Case Trend" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" onclick = update("Total")   >
+  <input type="button" value = "New Case Trend" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" onclick =  update("New")  >
+  <input type="button" value = "7 Day Average Case Trend" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" onclick =  update("Avg7day")  >
+ </div>
+ <br>
+ <div id="my_dataviz"></div>
+<script>
+async function update(val){
+
+d3.selectAll("path").remove()
+d3.selectAll("#anno").remove()
+d3.selectAll("circle").remove()
+
+d3.selectAll('input[value="Total Case Trend"]').disabled = false;
+d3.selectAll('input[value="New Case Trend"]').disabled = false;
+d3.selectAll('input[value="7 Day Average Case Trend"]').disabled = false;
+
+
+if (val == "Total") {
+
+
+var margin = {top: 50, right: 30, bottom: 60, left: 60},
+    width = 1300 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+// Add X axis
+var x = d3.scaleTime().range( [0, width] );
+var xAxis = 	  d3.axisBottom(x).ticks(100).tickFormat(d3.timeFormat("%d-%b-%y"));
+   
+// Add Y axis
+var y = d3.scaleLinear().range([ height, 0 ]);
+ var yAxis = 	  d3.axisLeft(y) ;
+  //    svg.append("g")
+	//  .attr("class","myYaxis");
+  
+overallcoviddata = await(
+d3.csv("https://raw.githubusercontent.com/savigovindarajan/savigovindarajan.github.io/master/US_Covid19_Overall.csv")
+)
+
+//X- Axis
+x.domain(d3.extent(overallcoviddata, function(d) { return d3.timeParse("%m/%d/%Y")(d.Date); }))
+d3.selectAll(".myXaxis").transition()
+    .duration(1000)
+	//.on("start", function(){svg.selectAll(".myXaxis.label").remove()})
+    .call(xAxis)//.tickFormat(d3.timeFormat("%m/%d/%Y")(overallcoviddata.Date))
+		.selectAll("text")
+		.style("text-anchor", "end")
+		.style("fontsize", "11px")
+		.attr("dx", "-.8em")
+          .attr("dy", "-.55em")
+        //.attr("dx", "0")
+        //.attr("dy", ".71em")
+        .attr("transform", "rotate(-90)")
+		;
+//Y - Axis		
+y.domain(d3.extent(overallcoviddata, function(d) { return (+d.tot_cases); }))
+ d3.selectAll(".myYaxis").transition()
+    .duration(1000)	
+	//.on("start", function(){svg.selectAll(".g").remove()})
+    .call(yAxis);
+//Color - Gradient	  
+	d3.selectAll('svg').append("linearGradient")
+      .attr("id", "line-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0)
+      .attr("y1", y(0))
+      .attr("x2", 0)
+      .attr("y2", y(d3.max(overallcoviddata, function(d) { return (+d.tot_cases); })))
+      .selectAll("stop")
+        .data([
+          {offset: "0%", color: "blue"},
+          {offset: "100%", color: "red"}
+        ])
+      .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+
+	
+     svg.append("path")
+	.data([overallcoviddata])
+	.attr("d", d3.line()
+        .x(function(d) { return x(d3.timeParse("%m/%d/%Y")(d.Date)); })
+        .y(function(d) { return y(+d.tot_cases); })
+        )	
+	  .attr("fill", "none")
+	  .attr("stroke", "url(#line-gradient)" )
+	  .attr("stroke-width", 1.5)
+ 	  ;
+	  
+/*d3.selectAll("svg")
+	.append("g")
+	.append("circle")
+	.attr("fill", "none")
+	  .attr("stroke", "red" )
+	  .attr("cx", 1150)
+	  .attr("cy", 170)
+	  .attr("r", 50)*/
+d3.selectAll("svg")
+	.append("g")
+	.append("line")
+	.attr("fill", "red")
+	  .attr("stroke", "red" )
+   .attr("x1", 500)
+    .attr("y1", 128)
+    .attr("x2", 500)
+    .attr("y2", 370)
+	  .style("stroke-width", 1.5)
+d3.selectAll("svg")	  
+	.append("g")
+	.append("line")
+	.attr("fill", "red")
+	  .attr("stroke", "red" )
+   .attr("x1", 1050)
+    .attr("y1", 125)
+    .attr("x2", 1150)
+    .attr("y2", 140)
+	.attr("rotate","60")
+	  .style("stroke-width", 1.5)
+d3.selectAll("svg")
+	.append("g")
+	.append("text")
+	.attr("id","anno")
+	.attr("x", 500)
+    .attr("y", 125)
+	.text("Slope is getting steeper, in March and towards mid-June, as the total number of COVID cases spikes")
+	.attr("font-size", "12px")
+    .attr("fill", "#2d3d45")
+	  
+	  }
+
+else if (val == "New"){
+d3.selectAll("path").remove()
+d3.selectAll("#anno").remove()
+d3.selectAll("line").remove()
+
+var margin = {top: 50, right: 30, bottom: 60, left: 60},
+    width = 1300 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+// Add X axis
+var x = d3.scaleTime().range( [0, width] );
+var xAxis = 	  d3.axisBottom(x).ticks(87).tickFormat(d3.timeFormat("%d-%b-%y"));
+   
+// Add Y axis
+var y = d3.scaleLinear().range([ height, 0 ]);
+ var yAxis = 	  d3.axisLeft(y) ;
+  //    svg.append("g")
+	//  .attr("class","myYaxis");
+  
+overallcoviddata = await(
+d3.csv("https://raw.githubusercontent.com/savigovindarajan/savigovindarajan.github.io/master/US_Covid19_Overall.csv")
+)
+
+//X- Axis
+x.domain(d3.extent(overallcoviddata, function(d) { return d3.timeParse("%m/%d/%Y")(d.Date); }))
+d3.selectAll(".myXaxis").transition()
+    .duration(1000)
+	//.on("start", function(){svg.selectAll(".myXaxis.label").remove()})
+    .call(xAxis)//.tickFormat(d3.timeFormat("%m/%d/%Y")(overallcoviddata.Date))
+		.selectAll("text")
+		.style("text-anchor", "end")
+		.style("fontsize", "11px")
+		.attr("dx", "-.8em")
+          .attr("dy", "-.55em")
+        //.attr("dx", "0")
+        //.attr("dy", ".71em")
+        .attr("transform", "rotate(-90)")
+		;
+//Y - Axis		
+y.domain(d3.extent(overallcoviddata, function(d) { return (+d.new_case); }))
+ d3.selectAll(".myYaxis").transition()
+    .duration(1000)	
+	//.on("start", function(){svg.selectAll(".g").remove()})
+    .call(yAxis);
+//Color - Gradient	  
+	d3.selectAll('svg').append("linearGradient")
+      .attr("id", "line-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0)
+      .attr("y1", y(0))
+      .attr("x2", 0)
+      .attr("y2", y(d3.max(overallcoviddata, function(d) { return (+d.new_case); })))
+      .selectAll("stop")
+        .data([
+          {offset: "0%", color: "blue"},
+          {offset: "100%", color: "red"}
+        ])
+      .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+
+	
+     svg.append("path")
+	.data([overallcoviddata])
+	.attr("d", d3.line()
+        .x(function(d) { return x(d3.timeParse("%m/%d/%Y")(d.Date)); })
+        .y(function(d) { return y(+d.new_case); })
+        )	
+	  .attr("fill", "none")
+	  .attr("stroke", "url(#line-gradient)" )
+	  .attr("stroke-width", 1.5)
+	  
+	  
+	d3.selectAll("svg")
+	.append("g")
+	.append("text")
+	.attr("id","anno")
+	.attr("x", 600)
+    .attr("y", 200)
+	.text("Lockdown controlled the number of daily new cases in April & May, which help flatten the curve")
+	.attr("font-size", "12px")
+    .attr("fill", "#2d3d45")
+
+}	  	
+else{
+d3.selectAll("path").remove()
+d3.selectAll("#anno").remove()
+d3.selectAll("line").remove()
+
+var margin = {top: 50, right: 30, bottom: 60, left: 60},
+    width = 1300 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+// Add X axis
+var x = d3.scaleTime().range( [0, width] );
+var xAxis = 	  d3.axisBottom(x).ticks(87).tickFormat(d3.timeFormat("%d-%b-%y"));
+   
+// Add Y axis
+var y = d3.scaleLinear().range([ height, 0 ]);
+ var yAxis = 	  d3.axisLeft(y) ;
+  //    svg.append("g")
+	//  .attr("class","myYaxis");
+  
+overallcoviddata = await(
+d3.csv("https://raw.githubusercontent.com/savigovindarajan/savigovindarajan.github.io/master/US_Covid19_Overall.csv")
+)
+
+//X- Axis
+x.domain(d3.extent(overallcoviddata, function(d) { return d3.timeParse("%m/%d/%Y")(d.Date); }))
+d3.selectAll(".myXaxis").transition()
+    .duration(1000)
+	//.on("start", function(){svg.selectAll(".myXaxis.label").remove()})
+    .call(xAxis)//.tickFormat(d3.timeFormat("%m/%d/%Y")(overallcoviddata.Date))
+		.selectAll("text")
+		.style("text-anchor", "end")
+		.style("fontsize", "11px")
+		.attr("dx", "-.8em")
+          .attr("dy", "-.55em")
+        //.attr("dx", "0")
+        //.attr("dy", ".71em")
+        .attr("transform", "rotate(-90)")
+		;
+//Y - Axis		
+y.domain(d3.extent(overallcoviddata, function(d) { return (+d.day7_average); }))
+ d3.selectAll(".myYaxis").transition()
+    .duration(1000)	
+	//.on("start", function(){svg.selectAll(".g").remove()})
+    .call(yAxis);
+//Color - Gradient	  
+	d3.selectAll('svg').append("linearGradient")
+      .attr("id", "line-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0)
+      .attr("y1", y(0))
+      .attr("x2", 0)
+      .attr("y2", y(d3.max(overallcoviddata, function(d) { return (+d.day7_average); })))
+      .selectAll("stop")
+        .data([
+          {offset: "0%", color: "blue"},
+          {offset: "100%", color: "red"}
+        ])
+      .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+
+	
+     svg.append("path")
+	.data([overallcoviddata])
+	.attr("d", d3.line()
+        .x(function(d) { return x(d3.timeParse("%m/%d/%Y")(d.Date)); })
+        .y(function(d) { return y(+d.day7_average); })
+        )	
+	  .attr("fill", "none")
+	  .attr("stroke", "url(#line-gradient)" )
+	  .attr("stroke-width", 1.5)
+	  
+
+	d3.selectAll("svg")
+	.append("g")
+	.append("text")
+	.attr("id","anno")
+	.attr("x", 900)
+    .attr("y", 125)
+	.text("Steep spike in Covid cases from mid-June")
+	.attr("font-size", "12px")
+    .attr("fill", "#2d3d45")
+	
+d3.selectAll("svg")	  
+	.append("g")
+	.append("line")
+	.attr("fill", "red")
+	  .attr("stroke", "red" )
+   .attr("x1", 1050)
+    .attr("y1", 127)
+    .attr("x2", 1155)
+    .attr("y2", 175)
+	.attr("rotate","60")
+	  .style("stroke-width", 1.5)
+	  
+ 
+		
+}	  	
+
+}
+ </script>
+</head>
+
+<body onload='init()'>
+<svg></svg>
+<style type="text/css">
+
+        
+/* Legend Font Style */
+body {
+	font: 8px sans-serif;
+}
+        
+/* Legend Position Style */
+.legend {
+	position:absolute;
+	left:800px;
+	top:350px;
+	}
+div.tooltip {	
+    position: absolute;			
+    text-align: left;			
+    padding: 2px;				
+    font: 18px calibri;		
+    pointer-events: none;			
+}
+</style>
+<script>
+async function init() {
+
+covid_Map();
+d3.selectAll('input[name="covidtest"]')	
+		 .on("change",function()
+		 { 
+		 var sel = d3.select('input[name="covidtest"]:checked').node().value;
+		 if(sel =="daily_trend"){
+		 console.log("Call Line Chart");
+		 var svg = d3.select("svg");
+			svg.selectAll("*").remove();
+			DailyTrend();
+			
+		 		 }
+		 else if (sel == "new_case" || sel == "tot_cases"){
+		var svg = d3.select("svg");
+		svg.selectAll("*").remove();
+		 covid_Map();
+		 }
+		 else{
+		 var svg = d3.select("svg");
+		 svg.selectAll("*").remove();
+		 Statewise();
+		 }
+		 });
+
+function Statewise(){
+
+d3.selectAll("path").remove()
+d3.selectAll("#anno").remove()
+d3.selectAll("line").remove()
+
+d3.select("#my_dataviz").selectAll("svg").remove();
+
+d3.selectAll('input[value="Total Case Trend"]')
+			    .style("color","transparent")
+				.style("background-color", "transparent")
+                .style("border-color","transparent")
+				.style("cursor","default")
+				d3.selectAll('input[value="Total Case Trend"]').disabled = true;
+d3.selectAll('input[value="New Case Trend"]')
+
+			    .style("color","transparent")
+				.style("background-color", "transparent")
+                .style("border-color","transparent")
+				.style("cursor","default")
+				.onclick = function() { update("New"); };
+				d3.selectAll('input[value="New Case Trend"]').disabled = true;
+d3.selectAll('input[value="7 Day Average Case Trend"]')
+			    .style("color","transparent")
+				.style("background-color", "transparent")
+                .style("border-color","transparent")
+				.style("cursor","default")
+				.onclick = function() { update("Avg"); };
+			d3.selectAll('input[value="7 Day Average Case Trend"]').disabled = true;
+			
+var margin = {top: 5, right: 5, bottom: 30, left: 40},
+    width = 250 - margin.left - margin.right,
+    height = 250 - margin.top - margin.bottom;		
+
+
+d3.csv("https://raw.githubusercontent.com/savigovindarajan/savigovindarajan.github.io/master/US_Covid19.csv").then( function(data) {
+
+//console.log(data);
+
+ var grpState = d3.nest() // nest function allows to group the calculation per level of a factor
+    .key(function(d) { return (d.state);})
+    .entries(data);
+	
+//console.log(grpState);
+	
+allKeys = grpState.map(function(d){return (d.key);})
+
+ var svg = d3.select("#my_dataviz")
+	.selectAll("uniqueChart")
+    .data(grpState)
+    .enter()
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+  // Add X axis --> it is a date format
+var x = d3.scaleTime()
+    .domain(d3.extent(data, function(d) { return d3.timeParse("%m/%d/%Y")(d.submission_date);  }))
+    .range([ 0, width ]);
+	
+	
+  svg
+    .append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.timeFormat("%b")))
+		.selectAll("text")
+		.style("text-anchor", "end")
+		.style("fontsize", "11px")
+		.attr("dx", "-.8em")
+          .attr("dy", "-.55em")
+        //.attr("dx", "0")
+        //.attr("dy", ".71em")
+        .attr("transform", "rotate(-90)");
+	
+//Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, d3.max(data, function(d) { return +d.day_7_avg; })])
+    .range([ height, 0 ]);
+	
+  svg.append("g")
+    .call(d3.axisLeft(y).ticks(5));
+	
+var color = d3.scaleLinear()
+    .domain(allKeys)
+    .range(["blue","red"]);
+	
+svg
+    .append("path")
+	//.enter()
+	.attr("fill", "none")
+    //.attr("stroke", function(d){ return color(d.key) })
+	.attr("stroke", "blue")
+    .attr("stroke-width", 1.9)
+	.attr("d", function(d){
+				return d3.line()
+				.x(function(d) { return x(d3.timeParse("%m/%d/%Y")(d.submission_date)); })
+				.y(function(d) { return y(+ d.day_7_avg); })
+				(d.values)
+         })
+ // Add titlesn
+  //d3.select("svg")
+  svg
+    .append("text")
+	.attr("text-anchor", "start")
+    .attr("y", 20)
+    .attr("x", 20)
+    .text(function(d){ return(d.key)})
+    .style("fill", "black" )
+	.attr("font-size","14px")
+
+})
+}
+
+async function covid_Map(){
+
+
+d3.selectAll('input[value="Total Case Trend"]')
+
+			    .style("color","transparent")
+				.style("background-color", "transparent")
+                .style("border-color","transparent")
+				.style("cursor","default")
+				d3.selectAll('input[value="Total Case Trend"]').disabled = true;
+				
+d3.selectAll('input[value="New Case Trend"]')
+
+			    .style("color","transparent")
+				.style("background-color", "transparent")
+                .style("border-color","transparent")
+				.style("cursor","default")
+				.onclick = function() { update("New"); };
+				d3.selectAll('input[value="New Case Trend"]').disabled = true;
+		
+		
+
+d3.selectAll('input[value="7 Day Average Case Trend"]')
+
+			    .style("color","transparent")
+				.style("background-color", "transparent")
+                .style("border-color","transparent")
+				.style("cursor","default")
+				.onclick = function() { update("Avg"); };
+			//	.on ("click","update('New')");
+				d3.selectAll('input[value="7 Day Average Case Trend"]').disabled = true;
+var width = 1100;
+var height = 600;
+var margin = 50;
+
+// D3 Projection
+var projection = d3.geoAlbersUsa()
+				   .translate([(width/2)+100, (height/2)-110])    // translate to center of screen
+				   .scale([1000]);          // scale things down so see entire US
+// Define path generator
+var path = d3.geoPath()               // path generator that will convert GeoJSON to SVG paths
+		  	 .projection(projection);  // tell path generator to use albersUsa projection
+			 
+//Define color scale for Total Cases`		 
+var colorScale = d3.scaleLinear()
+.domain([1000,400000])
+    .range(["lightyellow","red"]); 
+	
+//Defint color scale for New Cases
+var colorScaleNew = d3.scaleLinear()
+.domain([700,14000])
+    .range(["lightyellow","blue"]); 
+	
+//Define opactiy for tool tip
+var div = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+			  
+//Load data from Json & the .csv
+jsondata = await(d3.json(
+"https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"))
+coviddata = await(d3.csv("https://raw.githubusercontent.com/savigovindarajan/savigovindarajan.github.io/master/US_Covid19_0717.csv"))
+
+
+for(var i = 0; i < coviddata.length; i++){
+          var dataState = (coviddata[i].State);
+          var tot_cases = (coviddata[i].tot_cases);
+		  var new_case = (coviddata[i].new_case);
+		  var tot_death = (coviddata[i].tot_death);
+		  var new_death = (coviddata[i].new_death);
+		//  var new_death = (coviddata[i].submission_date);		  	  
+
+          
+          for(var n = 0; n < jsondata.features.length; n++){
+            var jsonState = jsondata.features[n].properties.name;
+            if(dataState == jsonState){
+              jsondata.features[n].properties.tot_cases = tot_cases;
+			  jsondata.features[n].properties.new_case = new_case;
+			  jsondata.features[n].properties.tot_death = tot_death;
+			  jsondata.features[n].properties.new_death = new_death;
+			 // jsondata.features[n].properties.date = submission_date;
+              break;
+            }
+	}
+	}
+var sel = d3.select('input[name="covidtest"]:checked').node().value;	
+console.log(sel)
+
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	.transition()
+	.duration(3000)
+	.attr("x", 30)
+    .attr("y", 260)
+	.attr("id","anno")
+	.text("Please mouse over individual state for more details..")
+	.attr("font-size", "12px")
+	.attr("font-weight","italic")
+    .style("fill", "gray")
+
+d3.select('svg')
+	.append('g')
+	.append('rect')
+	.attr("x", 30)
+    .attr("y", 60)
+    .attr("width", 200)
+    .attr("height", 180)
+	.attr("fill","none")
+	.attr("stroke","black")
+
+d3.select('svg')
+	.append('g')	
+	.append('rect')
+	.attr("x", 40)
+    .attr("y", 70)
+    .attr("width", 180)
+    .attr("height", 30)
+	.attr("fill","lightgray")
+	.attr("stroke","black")
+	
+d3.select('svg')
+	.append('g')	
+	.append('rect')
+	.attr("x", 40)
+    .attr("y", 160)
+    .attr("width", 180)
+    .attr("height", 30)
+	.attr("fill","lightgray")
+	.attr("stroke","black")	
+
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	.attr("x", function()
+				{if 
+				(sel == "tot_cases"){
+				return(70)
+				}
+				else 
+				{return(80)
+				}})
+    .attr("y", 90)
+	.attr("id","anno")
+	.text(function()
+				{if 
+				(sel == "tot_cases"){
+				return("TOTAL CASES")
+				}
+				else 
+				{return("NEW CASES")
+				}})
+	.attr("font-size", "16px")
+	.attr("font-weight","bold")
+    .attr("fontcolor", "black")
+	
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	.attr("x", function()
+				{if 
+				(sel == "tot_cases"){
+				return(80)
+				}
+				else 
+				{return(90)
+				}})
+    .attr("y", 130)
+	.attr("id","anno")
+	.text(function()
+				{if 
+				(sel == "tot_cases"){
+				return("3,618,497")
+				}
+				else 
+				{return("74,354")
+				}})
+	.attr("font-size", "20px")
+	.attr("font-weight","bold")
+    .attr("fontcolor", "black")	
+	.attr("font-stretch","5px")
+	
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	.attr("x", 80)
+    .attr("y", 180)
+	.attr("id","anno")
+	.text("AS OF DATE")
+	.attr("font-size", "16px")
+	.attr("font-weight","bold")
+    .attr("fontcolor", "black")
+	
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	.attr("x", 80)
+    .attr("y", 220)
+	.attr("id","anno")
+	.text("17-JUL-20")
+	.attr("font-size", "20px")
+	.attr("font-weight","bold")
+    .attr("fontcolor", "black")
+	
+	;
+
+
+d3.select('svg')
+	.attr("width",width )
+    .attr("height",height)
+	.append("g")
+    .attr("transform","translate(" + margin + "," + margin + ")")
+    .selectAll("path")
+	.data(jsondata.features)
+	 .enter()
+	 .append("path")
+	 .attr("d", function(eachfeature) {return path(eachfeature);})
+	 .attr("opacity",0.8)
+	 .attr("stroke","black")
+	 .attr("fill", function(d) {
+	 
+	 //assign the selection value based on the radio button selected
+	 var sel = d3.select('input[name="covidtest"]:checked').node().value;
+                   if(sel =="tot_cases"){
+                      return colorScale(d.properties.tot_cases);
+                   } else {
+                      return colorScaleNew(d.properties.new_case); 
+				}})
+	//on mouse hover show the tool tip
+	 .on("mouseover", function(d) {console.log("hover")
+	                     var html  = "<span style = 'font-size:15px;color:blue'><b>" + d.properties.name + "</b></span><br/>" +
+                        "<span style='color:black;font-size:12px'><b> Total Cases: </b>" + d.properties.tot_cases + "</span></br>" +
+                        "<span style='color:black;font-size:12px'><b> New Cases: </b>" + d.properties.new_case + "</span></br>" +
+                        "<span style='color:black;font-size:12px'><b> Total Deaths: </b>" + d.properties.tot_death + "</span></br>" +
+                        "<span style='color:black;font-size:12px'><b> New Deaths: </b>" + d.properties.new_death + "</span></br>";
+					div.transition()
+						.duration(200)
+						.style("opacity", 1);
+					div.html(html)
+                        .style("left", (d3.event.pageX + 15) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px")
+						.style("width",130)
+						.style("height",80)
+						.style("background",function(){
+						var sel = d3.select('input[name="covidtest"]:checked').node().value;
+						if(sel == "tot_cases"){
+						return("lightsteelblue");}
+						else {
+						return("cyan");}})
+						
+					})
+					
+	   .on("mouseout", function(d) {
+                    div.transition()
+                        .duration(300)
+                        .style("opacity", 0);
+                })
+				
+}
+
+async function DailyTrend(){
+
+d3.select("#my_dataviz").selectAll("svg").remove();
+
+d3.selectAll('input[value="Total Case Trend"]')
+
+			    .style("color","black")
+				.style("background-color", "lightgrey")
+                .style("border-color","black")
+				.style("cursor","pointer")
+				.onclick = function() { update("Total"); };
+				d3.selectAll('input[value="Total Case Trend"]').disabled = false;
+                //d3.selectAll('input[value="Total Case Trend"]');
+
+
+d3.selectAll('input[value="New Case Trend"]')
+
+			    .style("color","black")
+				.style("background-color", "lightgrey")
+                .style("border-color","black")
+				.style("cursor","pointer")
+				.onclick = function() { update("New"); };
+			//	.on ("click","update('New')");
+				d3.selectAll('input[value="New Case Trend"]').disabled = false;
+		//		d3.selectAll('input[value="New Case Trend"]').onclick = "update("New")";
+		
+
+d3.selectAll('input[value="7 Day Average Case Trend"]')
+
+			    .style("color","black")
+				.style("background-color", "lightgrey")
+                .style("border-color","black")
+				.style("cursor","pointer")
+				.onclick = function() { update("Avg"); };
+			//	.on ("click","update('New')");
+				d3.selectAll('input[value="7 Day Average Case Trend"]').enabled = true;
+
+var margin = {top: 50, right: 30, bottom: 60, left: 60},
+    width = 1300 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+	
+
+
+// append the svg object to the body of the page
+var svg = d3.select("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+		
+			//.style("label","Total Covid Case Trend")
+		//.attr("title","Total Covid Cases")
+		;
+	  
+
+
+   // Add X axis
+var x = d3.scaleTime().range( [0, width] );
+var xAxis = 	  d3.axisBottom(x).ticks(87).tickFormat(d3.timeFormat("%d"))
+	 svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+	  .attr("class","myXaxis")
+
+
+   
+// Add Y axis
+var y = d3.scaleLinear().range([ height, 0 ]);
+ var yAxis = 	  d3.axisLeft(y) 
+      svg.append("g")
+	  .attr("class","myYaxis");
+				
+
+update("Total");  
+}
+
+}
+
+</script>
