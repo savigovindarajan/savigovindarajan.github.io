@@ -24,7 +24,7 @@ async function update(val){
 
 d3.selectAll("path").remove()
 d3.selectAll("#anno").remove()
-d3.selectAll("circle").remove()
+d3.selectAll("line").remove()
 
 d3.selectAll('input[value="Total Case Trend"]').disabled = false;
 d3.selectAll('input[value="New Case Trend"]').disabled = false;
@@ -37,6 +37,8 @@ if (val == "Total") {
 var margin = {top: 50, right: 30, bottom: 60, left: 60},
     width = 1300 - margin.left - margin.right,
     height = 450 - margin.top - margin.bottom;
+	
+	
 
 // append the svg object to the body of the page
 var svg = d3.select("svg")
@@ -44,6 +46,20 @@ var svg = d3.select("svg")
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+	  
+	  
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	//.transition()
+	//.duration(3000)
+	.attr("x", 600)
+    .attr("y", 60)
+	.attr("id","anno")
+	.text("Daily Trend of Total Cases")
+	.attr("font-size", "20px")
+	.attr("font-weight","bold")
+    .style("fill", "gray")	  
 // Add X axis
 var x = d3.scaleTime().range( [0, width] );
 var xAxis = 	  d3.axisBottom(x).ticks(100).tickFormat(d3.timeFormat("%d-%b-%y"));
@@ -164,6 +180,20 @@ var svg = d3.select("svg")
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+	  
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	//.transition()
+	//.duration(3000)
+	.attr("x", 600)
+    .attr("y", 60)
+	.attr("id","anno")
+	.text("Daily Trend of New Cases")
+	.attr("font-size", "20px")
+	.attr("font-weight","bold")
+    .style("fill", "gray")	  
+	
 // Add X axis
 var x = d3.scaleTime().range( [0, width] );
 var xAxis = 	  d3.axisBottom(x).ticks(87).tickFormat(d3.timeFormat("%d-%b-%y"));
@@ -254,6 +284,18 @@ var svg = d3.select("svg")
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform","translate(" + margin.left + "," + margin.top + ")")
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	//.transition()
+	//.duration(3000)
+	.attr("x", 580)
+    .attr("y", 60)
+	.attr("id","anno")
+	.text("Last 7 Days Average Trend")
+	.attr("font-size", "20px")
+	.attr("font-weight","bold")
+    .style("fill", "gray")	  	  
 // Add X axis
 var x = d3.scaleTime().range( [0, width] );
 var xAxis = 	  d3.axisBottom(x).ticks(87).tickFormat(d3.timeFormat("%d-%b-%y"));
@@ -562,13 +604,13 @@ d3.selectAll('input[value="7 Day Average Case Trend"]')
 				.onclick = function() { update("Avg"); };
 			//	.on ("click","update('New')");
 				d3.selectAll('input[value="7 Day Average Case Trend"]').disabled = true;
-var width = 1100;
+var width = 1300;
 var height = 600;
 var margin = 50;
 
 // D3 Projection
 var projection = d3.geoAlbersUsa()
-				   .translate([(width/2)+100, (height/2)-110])    // translate to center of screen
+				   .translate([(width/2)-50, (height/2)-110])    // translate to center of screen
 				   .scale([1000]);          // scale things down so see entire US
 // Define path generator
 var path = d3.geoPath()               // path generator that will convert GeoJSON to SVG paths
@@ -736,7 +778,109 @@ d3.select('svg')
     .attr("fontcolor", "black")
 	
 	;
+	
+/*d3.select('svg')
+	.append('g')
+	.append('rect')
+	.attr("x", 1020)
+    .attr("y", 60)
+    .attr("width", 200)
+    .attr("height", 200)
+	.attr("fill","none")
+	.attr("stroke","black");
 
+d3.select('svg')
+	.append('g')	
+	.append('rect')
+	.attr("x", 1030)
+    .attr("y", 70)
+    .attr("width", 180)
+    .attr("height", 30)
+	.attr("fill","lightgray")
+	.attr("stroke","black");*/
+
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	.attr("x", function()
+				{if 
+				(sel == "tot_cases"){
+				return(1040)
+				}
+				else 
+				{return(1040)
+				}})
+    .attr("y", 90)
+	.attr("id","anno")
+	.text(function()
+				{if 
+				(sel == "tot_cases"){
+				return("10 WORST IMPACTED STATES")
+				}
+				else 
+				{return("10 STATES GETTING WORSE")
+				}})
+	.attr("font-size", "11px")
+	.attr("font-weight","bold")
+    .attr("fontcolor", "black");	
+d3.select('svg')
+	.append('g')	
+	.append('text')
+	.attr("x", function()
+				{if 
+				(sel == "tot_cases"){
+				return(1050)
+				}
+				else 
+				{return(1050)
+				}})
+    .attr("y", 120)
+	.attr("id","anno")
+	.text(function()
+				{if 
+				(sel == "tot_cases"){
+				return("New York")
+				}
+				else 
+				{return("Texas")
+				}})	.attr("font-size", "13px").attr("fontcolor", "black")
+//2	
+	d3.select('svg').append('g').append('text')	.transition().duration(750).attr("x",1050)	.attr("y", 135)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("California")}
+				else {return("Florida")}})	.attr("font-size", "12px").attr("fontcolor", "black")
+//3				
+		d3.select('svg').append('g').append('text').transition().duration(1000)	.attr("x",1050)	.attr("y", 150)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("Florida")}
+				else {return("California")}})	.attr("font-size", "12px").attr("fontcolor", "black")		
+//4				
+		d3.select('svg').append('g').append('text')	.transition().duration(1250)	.attr("x",1050)	.attr("y", 165)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("Texas")}
+				else {return("Arizona")}})	.attr("font-size", "12px").attr("fontcolor", "black")	
+//5				
+		d3.select('svg').append('g').append('text')	.transition().duration(1500).	attr("x",1050)	.attr("y", 180)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("New Jersey")}
+				else {return("Georgia")}})	.attr("font-size", "12px").attr("fontcolor", "black")	
+//6	
+	d3.select('svg').append('g').append('text').transition().duration(1750)		.attr("x",1050)	.attr("y", 195)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("Illinois")}
+				else {return("Tennessee")}})	.attr("font-size", "12px").attr("fontcolor", "black")
+//7				
+		d3.select('svg').append('g').append('text').transition().duration(2000)		.attr("x",1050)	.attr("y", 210)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("Arizona")}
+				else {return("Louisiana")}})	.attr("font-size", "12px").attr("fontcolor", "black")		
+//8				
+		d3.select('svg').append('g').append('text').transition().duration(2250)		.attr("x",1050)	.attr("y", 225)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("Georgia")}
+				else {return("North Carolina")}})	.attr("font-size", "12px").attr("fontcolor", "black")	
+//9				
+		d3.select('svg').append('g').append('text').transition().duration(2500)		.attr("x",1050)	.attr("y", 240)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("Massachusetts")}
+				else {return("Alabama")}})	.attr("font-size", "12px").attr("fontcolor", "black")		
+//10				
+		d3.select('svg').append('g').append('text').transition().duration(2750)		.attr("x",1050)	.attr("y", 255)	.attr("id","anno")
+	.text(function(){if (sel == "tot_cases"){return("Pennsylvania")}
+				else {return("South Carolina")}})	.attr("font-size", "12px").attr("fontcolor", "black")					
+				;	
 
 d3.select('svg')
 	.attr("width",width )
