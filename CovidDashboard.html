@@ -467,13 +467,11 @@ var x = d3.scaleTime()
     .append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x).ticks(5).tickFormat(d3.timeFormat("%b")))
-		.selectAll("text")
+			.selectAll("text")
 		.style("text-anchor", "end")
 		.style("fontsize", "11px")
 		.attr("dx", "-.8em")
           .attr("dy", "-.55em")
-        //.attr("dx", "0")
-        //.attr("dy", ".71em")
         .attr("transform", "rotate(-90)");
 	
 //Add Y axis
@@ -484,16 +482,34 @@ var x = d3.scaleTime()
   svg.append("g")
     .call(d3.axisLeft(y).ticks(5));
 	
-var color = d3.scaleLinear()
-    .domain(allKeys)
-    .range(["blue","red"]);
+	
+//Color - Gradient	  
+	//d3.selectAll('svg')
+	svg
+	.append("g")
+	.append("linearGradient")
+      .attr("id", "line-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0)
+      .attr("y1", y(0))
+      .attr("x2", 0)
+      .attr("y2", y(d3.max(data, function(d) { return +d.day_7_avg; })))
+      .selectAll("stop")
+        .data([
+          {offset: "0%", color: "green"},
+          {offset: "100%", color: "red"}
+        ])
+      .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+	
 	
 svg
     .append("path")
 	//.enter()
 	.attr("fill", "none")
     //.attr("stroke", function(d){ return color(d.key) })
-	.attr("stroke", "blue")
+	.attr("stroke", "url(#line-gradient)")
     .attr("stroke-width", 1.9)
 	.attr("d", function(d){
 				return d3.line()
@@ -517,7 +533,7 @@ svg
 
 async function covid_Map(){
 
-
+d3.select("#my_dataviz").selectAll("svg").remove();
 d3.selectAll('input[value="Total Case Trend"]')
 
 			    .style("color","transparent")
